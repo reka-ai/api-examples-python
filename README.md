@@ -5,7 +5,6 @@
 
 This repository showcases how to use the **Reka Research** to build intelligent apps that can search the web, structure responses, and support reasoning. It’s designed to help developers learn how to integrate and use Reka Research with different tools and frameworks.
 
-
 ## 📚 What's in this repo
 
 | Folder/File                                | Description                                                                |
@@ -14,6 +13,7 @@ This repository showcases how to use the **Reka Research** to build intelligent 
 | `Use Reka Research with requests.ipynb`    | Example notebook using raw HTTP requests to call the Reka API              |
 | `gradio/`                                  | Gradio app that streams responses and displays reasoning steps             |
 | `streamlit/`                               | Streamlit app that streams responses and displays reasoning steps          |
+| `event_finder/`                            | Streamlit app for researching and finding events with Reka Reearch         |
 
 ## 🚀 Getting Started
 
@@ -34,6 +34,7 @@ This repository showcases how to use the **Reka Research** to build intelligent 
    ```
 
 4. **Run an app**
+   - Event Finder: `cd event_finder && streamlit run app.py`
    - Gradio: `cd gradio && python app.py`
    - Streamlit: `cd streamlit && streamlit run app.py`
    - Jupyter notebooks: Open and run in your preferred environment
