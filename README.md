@@ -13,9 +13,10 @@ This repository showcases how to use the **Reka Research** to build intelligent 
 | `Use Reka Research with requests.ipynb`    | Example notebook using raw HTTP requests to call the Reka API              |
 | `gradio/`                                  | Gradio app that streams responses and displays reasoning steps             |
 | `streamlit/`                               | Streamlit app that streams responses and displays reasoning steps          |
-| `event_finder/`                            | Streamlit app for researching and finding events with Reka Reearch         |
+| `event_finder/`                            | Streamlit app for researching and finding events with Reka Research        |
+| `typescript/`                              | Typescript app for researching and finding restaurants with Reka Research  |
 
-## 🚀 Getting Started
+## 🚀 Getting Started (Python)
 
 1. **Install requirements**  
 
@@ -38,6 +39,35 @@ This repository showcases how to use the **Reka Research** to build intelligent 
    - Gradio: `cd gradio && python app.py`
    - Streamlit: `cd streamlit && streamlit run app.py`
    - Jupyter notebooks: Open and run in your preferred environment
+
+##  🖥️ Getting Started (Typescript)
+
+1. **Install requirements**  
+
+   Make sure you have Node.js (version 18 or higher) and npm installed on your system.
+   
+   ```bash
+   cd typescript/reka-restaurants
+   npm install
+   ```
+
+2. **Get your Reka API Key**  
+
+   Sign up at [Reka Platform](https://platform.reka.ai) and get your API key.
+
+3. **Set environment variable**
+
+   ```bash
+   export REKA_API_KEY=your_api_key_here
+   ```
+
+4. **Run the app**
+   
+   ```bash
+   npm run build
+   npm start
+   ```
+   Open your browser and navigate to http://localhost:5173
 
 ## 🧪 Why use this repo?
 
