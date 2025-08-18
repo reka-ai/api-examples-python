@@ -19,8 +19,6 @@ app.use(express.static(publicDir));
 
 const port = Number(process.env.PORT || 5173);
 
-const reka_research = new OpenAI({ apiKey: process.env.REKA_API_KEY, baseURL: 'https://api.reka.ai/v1' });
-
 const RestaurantItemSchema = z.object({
   name: z.string(),
   cuisine: z.string(),
@@ -44,6 +42,11 @@ type ApproxLocation = {
   timezone?: string;
 };
 
+// OpenAI API Compatible Client for Reka Research
+const reka_research = new OpenAI(
+  { apiKey: process.env.REKA_API_KEY, baseURL: 'https://api.reka.ai/v1' },
+);
+
 app.post('/api/recommendations', async (req: Request, res: Response) => {
   try {
     const user_query: string = (req.body?.query ?? '').toString();
@@ -61,11 +64,16 @@ app.post('/api/recommendations', async (req: Request, res: Response) => {
       messages: [
         { role: "user", content: query },
       ],
+      // Specify the structured response format
       response_format: zodResponseFormat(RestaurantSchema, "restaurants"),
       research: {
         web_search: {
+          // Can be used to restrict the search to a specific domain(s). For example, to only search TripAdvisor.
+          // A separate related field is "blocked_domains" to block specific domains.
           allowed_domains: ["tripadvisor.com"],
+          // Limit the number of web searches Reka Research can do.
           max_uses: 1,
+          // Can specify the user's location to ground the agent's search / response.
           user_location: {
             approximate: {
               country: loc?.country,
@@ -79,6 +87,7 @@ app.post('/api/recommendations', async (req: Request, res: Response) => {
     });
 
     const msg = completion.choices[0].message;
+    // Parse reasoning trace for user transparency.
     // @ts-expect-error New API
     const reasoning_steps = msg.reasoning_steps;
     const responseBody = { ok: true, data: msg.parsed, reasoning_steps: reasoning_steps };
