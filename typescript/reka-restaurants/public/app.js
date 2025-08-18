@@ -235,16 +235,6 @@ async function init() {
   form?.addEventListener("submit", handleSubmit);
   getUserLocation().then((loc) => {
     window.__REKA_LOCATION__ = loc;
-    const locBadge = document.querySelector("#loc-badge");
-    if (locBadge) {
-      if (loc) {
-        locBadge.textContent = "Using your approximate location";
-        locBadge.classList.add("ok");
-      } else {
-        locBadge.textContent = "Location not shared";
-        locBadge.classList.add("warn");
-      }
-    }
   });
 }
 document.addEventListener("DOMContentLoaded", init);

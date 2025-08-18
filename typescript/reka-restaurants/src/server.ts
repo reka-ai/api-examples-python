@@ -7,8 +7,6 @@ import OpenAI from 'openai';
 import { z } from 'zod';
 import { zodResponseFormat } from 'openai/helpers/zod';
 
-const reka_research = new OpenAI({ apiKey: process.env.REKA_STAGING_API_KEY, /*baseURL: 'https://api.reka.ai/v1'*/ baseURL: 'http://localhost:8002' });
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
@@ -21,9 +19,7 @@ app.use(express.static(publicDir));
 
 const port = Number(process.env.PORT || 5173);
 
-app.get('/api/health', (_req: Request, res: Response) => {
-  res.json({ ok: true, service: 'reka-restaurants', time: new Date().toISOString() });
-});
+const reka_research = new OpenAI({ apiKey: process.env.REKA_API_KEY, baseURL: 'https://api.reka.ai/v1' });
 
 const RestaurantItemSchema = z.object({
   name: z.string(),
@@ -51,8 +47,6 @@ type ApproxLocation = {
 app.post('/api/recommendations', async (req: Request, res: Response) => {
   try {
     const user_query: string = (req.body?.query ?? '').toString();
-    let query = "You are a restaurant recommender. User asked for " + user_query + ". Respond with a short list of 3 restaurants that match the user's query. Always respond as JSON that matches the provided schema.";
-
     const loc: ApproxLocation = {
       country: req.body?.location?.country ?? null,
       city: req.body?.location?.city ?? null,
@@ -60,16 +54,18 @@ app.post('/api/recommendations', async (req: Request, res: Response) => {
       timezone: req.body?.location?.timezone ?? null,
     };
 
+    let query = "You are a restaurant recommender. User asked for " + user_query + ". Respond with a short list of 3 restaurants that match the user's query. Always respond as JSON that matches the provided schema.";
+
     const completion = await reka_research.chat.completions.parse({
-      model: "reka-flash-research-20250709",
+      model: "reka-flash-research",
       messages: [
         { role: "user", content: query },
       ],
       response_format: zodResponseFormat(RestaurantSchema, "restaurants"),
       research: {
         web_search: {
+          allowed_domains: ["tripadvisor.com"],
           max_uses: 1,
-          allowed_domains: ["yelp.com"],
           user_location: {
             approximate: {
               country: loc?.country,
@@ -85,9 +81,7 @@ app.post('/api/recommendations', async (req: Request, res: Response) => {
     const msg = completion.choices[0].message;
     // @ts-expect-error New API
     const reasoning_steps = msg.reasoning_steps;
-    console.log('Reasoning steps:', JSON.stringify(reasoning_steps, null, 2));
     const responseBody = { ok: true, data: msg.parsed, reasoning_steps: reasoning_steps };
-    console.log('Response to /api/recommendations:', JSON.stringify(responseBody, null, 2));
     res.json(responseBody);
   } catch (error: any) {
     const message = error?.message || 'Unknown error';

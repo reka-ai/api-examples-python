@@ -280,19 +280,9 @@ async function init() {
   const form = document.querySelector('#search-form') as HTMLFormElement | null;
   form?.addEventListener('submit', handleSubmit);
 
-  // Try to get user location ASAP, but don't block UI
+  // Mock user location
   getUserLocation().then((loc) => {
     (window as any).__REKA_LOCATION__ = loc;
-    const locBadge = document.querySelector('#loc-badge') as HTMLDivElement | null;
-    if (locBadge) {
-      if (loc) {
-        locBadge.textContent = 'Using your approximate location';
-        locBadge.classList.add('ok');
-      } else {
-        locBadge.textContent = 'Location not shared';
-        locBadge.classList.add('warn');
-      }
-    }
   });
 }
 
