@@ -9,7 +9,7 @@ This repository showcases how to use the **Reka Research** to build intelligent 
 
 ## 📋 More Examples in Other Languages
 
-- [Reka api-examples with TypeScript](https://github.com/reka-ai/api-examples)
+- [Reka api-examples with TypeScript](https://github.com/reka-ai/api-examples-typescript)
 
 
 ## 📚 What's in this repo
