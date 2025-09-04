@@ -1,7 +1,7 @@
 
 # Reka API Examples
 
-[![Join our Discord](assets/discord-invite.png)](https://discord.com/invite/MTRJEBvH)
+[![Join our Discord](assets/discord-invite.png)](https://link.reka.ai/discord)
 
 ![Reka AI](assets/reka-ai-cover.jpeg)
 
