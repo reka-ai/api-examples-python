@@ -5,6 +5,11 @@
 
 This repository showcases how to use the **Reka Research** to build intelligent apps that can search the web, structure responses, and support reasoning. It’s designed to help developers learn how to integrate and use Reka Research with different tools and frameworks.
 
+##  📋 More Examples in Other Languages
+
+- [Reka api-examples with TypeScript](https://github.com/reka-ai/api-examples-typescript)
+- [Reka api-examples with .NET](https://github.com/reka-ai/api-examples-dotnet)
+
 ## 📚 What's in this repo
 
 | Folder/File                                | Description                                                                |
