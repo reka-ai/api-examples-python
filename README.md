@@ -39,4 +39,5 @@ This repository showcases how to use the **Reka Research** to build intelligent 
 
 ## 🤝 Contributions
 
-Feel free to open issues or submit PRs to add more examples or improve existing ones.
+If you find a bug or would like to add a feature, check out those resources:
+Check out our [Code of Conduct](CODE_OF_CONDUCT.md) and [Contributing](CONTRIBUTING.md) docs.
