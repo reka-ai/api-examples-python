@@ -1,0 +1,29 @@
+# Exclude secrets and local files from the build context
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Virtual envs
+.venv/
+venv/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# OS / Editor junk
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Git
+.git/
+.gitignore
