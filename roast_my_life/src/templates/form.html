@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roast a Video - Roast My Life</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Roast My Life</h1>
+            <p>AI-powered gentle roasting with Reka Vision</p>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/form" class="active">Roast a Video</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="form-section">
+            <h2>Select a Video to Roast</h2>
+            <p style="color: #403E34; margin-bottom: 2rem;">
+                Pick a video below and click <strong>Roast Video</strong>. We'll send it to the Vision
+                chat endpoint with a gentle roast prompt and display the model's playful commentary.
+            </p>
+
+            <div class="image-grid" id="videoGrid">
+                <!-- Add Video Card -->
+                <div class="image-card add-card" id="addVideoCard" onclick="showAddVideoPopup()">
+                    <div class="plus-icon">+</div>
+                    <h3>Add Video</h3>
+                </div>
+                {% for video in videos %}
+                <div class="image-card" data-id="{{ video.id }}" data-url="{{ video.url }}" onclick="selectVideo('{{ video.id }}')">
+                    {% if video.thumbnail %}
+                    <img src="{{ video.thumbnail }}" alt="{{ video.name }}" onerror="this.parentElement.querySelector('.thumbnail-placeholder').style.display='flex'; this.style.display='none';">
+                    <div class="thumbnail-placeholder" style="display: none;">
+                        <div class="thumbnail-spinner"></div>
+                        <p>Processing...</p>
+                    </div>
+                    {% else %}
+                    <div class="thumbnail-placeholder">
+                        <div class="thumbnail-spinner"></div>
+                        <p>Processing...</p>
+                    </div>
+                    {% endif %}
+                    <h3>{{ video.name }}</h3>
+                </div>
+                {% else %}
+                <p>No videos available. Check API configuration.</p>
+                {% endfor %}
+            </div>
+
+            <div class="button-container">
+                <button class="btn" id="processBtn" onclick="processVideo()" disabled>
+                    Roast Video
+                </button>
+                <button class="btn btn-secondary" id="watchBtn" onclick="watchVideo()" disabled>
+                    Watch Video
+                </button>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <div class="spinner" id="spinner">
+                <div class="spinner-icon"></div>
+                <p>Summoning spicy (but kind) commentary...</p>
+            </div>
+
+            <div class="result-section" id="resultSection">
+                <h3>Roast Result</h3>
+                <div class="result-content" id="resultContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Video Popup -->
+    <div class="popup-overlay" id="addVideoPopup">
+        <div class="popup-form">
+            <h2>Add a New Video</h2>
+            <label for="videoName">Video Name:</label>
+            <input type="text" id="videoName" name="videoName" required>
+            <label for="videoUrl">Video URL:</label>
+            <input type="url" id="videoUrl" name="videoUrl" required>
+            <div class="popup-buttons">
+                <button class="btn" onclick="uploadVideo()">Upload</button>
+                <button class="btn cancel" onclick="hideAddVideoPopup()">Cancel</button>
+            </div>
+            <div class="popup-error" id="popupError"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Roast My Life - Built with Flask &amp; ❤️ using Reka Vision</p>
+        <p><a href="https://docs.reka.ai/vision" target="_blank" style="color:#2276FF;">Vision Docs</a> · <a href="https://link.reka.ai/free" target="_blank" style="color:#2276FF;">Get a FREE API Key</a></p>
+    </footer>
+
+    <script>
+    let selectedVideoId = null;
+    let selectedVideoUrl = null;
+
+        /**
+         * Show the Add Video popup form.
+         */
+        function showAddVideoPopup() {
+            document.getElementById('addVideoPopup').style.display = 'flex';
+            document.getElementById('videoName').value = '';
+            document.getElementById('videoUrl').value = '';
+            document.getElementById('popupError').textContent = '';
+        }
+
+        /**
+         * Hide the Add Video popup form.
+         */
+        function hideAddVideoPopup() {
+            document.getElementById('addVideoPopup').style.display = 'none';
+        }
+
+        /**
+         * Upload a new video to the Reka API via the backend.
+         */
+        async function uploadVideo() {
+            const name = document.getElementById('videoName').value.trim();
+            const url = document.getElementById('videoUrl').value.trim();
+            const errorDiv = document.getElementById('popupError');
+            
+            errorDiv.textContent = '';
+            
+            if (!name || !url) {
+                errorDiv.textContent = 'Please enter both name and video URL.';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/upload_video', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        video_name: name,
+                        video_url: url
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    hideAddVideoPopup();
+                    // Reload the page to show the new video
+                    location.reload();
+                } else {
+                    errorDiv.textContent = data.error || 'Failed to upload video.';
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Error: ' + err.message;
+            }
+        }
+
+        /**
+         * Handle image selection from the grid.
+         * Updates the UI to highlight the selected image and enables the process button.
+         * 
+         * @param {number} imageId - The ID of the selected image.
+         */
+        function selectVideo(videoId) {
+            selectedVideoId = videoId;
+            
+            // Remove 'selected' class from all cards
+            document.querySelectorAll('.image-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Add 'selected' class to clicked card
+            const selectedCard = document.querySelector(`.image-card[data-id="${videoId}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+                selectedVideoUrl = selectedCard.getAttribute('data-url');
+            }
+            
+            // Enable the process button
+            document.getElementById('processBtn').disabled = false;
+            
+            // Enable the watch button if URL is available
+            const watchBtn = document.getElementById('watchBtn');
+            if (selectedVideoUrl && selectedVideoUrl.trim() !== '') {
+                watchBtn.disabled = false;
+            } else {
+                watchBtn.disabled = true;
+            }
+            
+            // Hide previous results and errors
+            document.getElementById('resultSection').classList.remove('show');
+            document.getElementById('errorMessage').classList.remove('show');
+        }
+
+        /**
+         * Process the selected image by making an async API call.
+         * Displays a loading spinner during the request and shows the result or error message.
+         */
+        async function processVideo() {
+            if (!selectedVideoId) {
+                showError('Please select a video first');
+                return;
+            }
+
+            // Show spinner and hide previous results
+            document.getElementById('spinner').classList.add('show');
+            document.getElementById('resultSection').classList.remove('show');
+            document.getElementById('errorMessage').classList.remove('show');
+            document.getElementById('processBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        video_id: selectedVideoId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Display the result (already sanitized / converted server-side)
+                    document.getElementById('resultContent').innerHTML = data.result;
+                    document.getElementById('resultSection').classList.add('show');
+                } else {
+                    // Display error
+                    showError(data.error || 'An error occurred while processing your request');
+                }
+            } catch (error) {
+                showError('Failed to connect to the API: ' + error.message);
+            } finally {
+                // Hide spinner and re-enable button
+                document.getElementById('spinner').classList.remove('show');
+                document.getElementById('processBtn').disabled = false;
+            }
+        }
+
+        /**
+         * Display an error message to the user.
+         * 
+         * @param {string} message - The error message to display.
+         */
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+        }
+
+        /**
+         * Open the selected video in a new tab.
+         */
+        function watchVideo() {
+            if (!selectedVideoUrl || selectedVideoUrl.trim() === '') {
+                showError('No video URL available for this video');
+                return;
+            }
+            window.open(selectedVideoUrl, '_blank');
+        }
+    </script>
+
+    <style>
+        /* Add Video Card Styles */
+        .add-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #f5f5f5;
+            border: 2px dashed #2276FF;
+            color: #2276FF;
+            cursor: pointer;
+            height: 220px;
+            width: 220px;
+            margin: 0.5rem;
+            font-size: 2rem;
+            transition: box-shadow 0.2s;
+        }
+        .add-card:hover {
+            box-shadow: 0 0 10px #2276FF44;
+        }
+        .plus-icon {
+            font-size: 5rem;
+            font-weight: bold;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Popup Styles */
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .popup-form {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+            min-width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .popup-form h2 {
+            margin: 0 0 1rem 0;
+            color: #2E2F2F;
+        }
+        .popup-form label {
+            font-weight: 500;
+            margin-bottom: 0.2rem;
+            color: #403E34;
+        }
+        .popup-form input {
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        .popup-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .popup-buttons .btn {
+            flex: 1;
+        }
+        .popup-buttons .cancel {
+            background: #eee;
+            color: #333;
+        }
+        .popup-buttons .cancel:hover {
+            background: #ddd;
+        }
+        .popup-error {
+            color: #d32f2f;
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+            min-height: 1.2em;
+        }
+        
+        /* Watch Video Button Styles */
+        .btn-secondary {
+            background: #6C757D;
+        }
+        .btn-secondary:hover:not(:disabled) {
+            background: #5A6268;
+        }
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+        }
+        .button-container .btn {
+            flex: 0 1 auto;
+            min-width: 150px;
+        }
+        
+        /* Thumbnail Placeholder Styles */
+        .thumbnail-placeholder {
+            width: 100%;
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #E9F2F6 0%, #D6E9F1 100%);
+            border-radius: 6px;
+            gap: 1rem;
+        }
+        
+        .thumbnail-spinner {
+            border: 4px solid #D5D0C1;
+            border-top: 4px solid #2276FF;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        
+        .thumbnail-placeholder p {
+            color: #203F72;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</body>
+</html>

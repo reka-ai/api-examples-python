@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roast My Life - AI Video Commentary</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Roast My Life</h1>
+            <p>Playful AI commentary (aka gentle roasting) powered by Reka Vision</p>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="/" class="active">Home</a></li>
+            <li><a href="/form">Roast a Video</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="welcome-section">
+            <h2>Welcome to Roast My Life 🎉</h2>
+            <p>
+                This light‑hearted demo uses the <strong>Reka Vision API</strong> to gently roast the people
+                in your videos – like an AI best friend narrating your highlight (or lowlight) reel.
+            </p>
+            <p>
+                Select a video, send it to the model, and get back playful commentary. The output is
+                lightly sanitized Markdown converted to safe HTML.
+            </p>
+            
+            <h3 style="color: #203F72; margin-top: 2rem; margin-bottom: 1rem;">Features</h3>
+            <ul class="feature-list">
+                <li>Reka Vision chat integration for playful roasting</li>
+                <li>Dynamic video list fetched from your Vision backend</li>
+                <li>Responsive design & Docker support</li>
+                <li>Readable, well-commented Python code</li>
+            </ul>
+
+            <h3 style="color: #203F72; margin-top: 2rem; margin-bottom: 1rem;">Try It</h3>
+            <p>
+                Head over to <strong>Roast a Video</strong>, pick a clip, and click <em>Roast Video</em>.
+                The backend calls the Vision chat endpoint with a gentle roast prompt and shows the reply.
+            </p>
+            <p style="font-size: 0.9rem; color: #403E34; margin-top: 1.5rem;">
+                Disclaimer: Keep it friendly. Always review AI output before sharing publicly.
+            </p>
+        </div>
+    </div>
+
+    <footer>
+    <p>Roast My Life - Built with Flask &amp; ❤️ using Reka Vision</p>
+    <p><a href="https://docs.reka.ai/vision" target="_blank" style="color:#2276FF;">Vision Docs</a> · <a href="https://link.reka.ai/free" target="_blank" style="color:#2276FF;">Get a FREE API Key</a></p>
+    </footer>
+</body>
+</html>
