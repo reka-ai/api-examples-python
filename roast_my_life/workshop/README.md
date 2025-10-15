@@ -13,7 +13,7 @@ You'll paste the code step-by-step into placeholders inside the app to make it f
 
 1. [📋 Important Instructions](#📋-important-instructions)
 2. [🎯 Workshop Agenda](#🎯-workshop-agenda)
-3. [🔍 Introduction to Reka Vision API](#🔍-introduction-to-reka-vision-api)
+3. [👀 Introduction to Reka Vision API](#🔍-introduction-to-reka-vision-api)
 4. [🚀 Setting Up the Development Environment](#🚀-setting-up-the-development-environment)
 5. [🔑 Getting Your API Key](#🔑-getting-your-api-key)
 6. [💻 Making the App Dynamic](#💻-making-the-app-dynamic)
@@ -39,7 +39,7 @@ By the end of this workshop, you will:
 - ✅ Implement functionality to list videos, upload videos, and roast a selected video
 - ✅ Run the app locally and explore ideas to extend it
 
-## 🔍 Introduction to Reka Vision API
+## 👀 Introduction to Reka Vision API
 
 The Reka Vision API provides powerful video processing and analysis capabilities, enabling you to upload, manage, and interact with videos using AI-powered question answering. 
 
@@ -454,6 +454,24 @@ def call_reka_vision_qa(video_id: str) -> Dict[str, Any]:
         return {"error": f"Chat API call failed: {e}"}
 ```
 
+#### 🔍 What the Code Does
+
+This function handles communication with the Reka Vision QA API to generate roasts for videos. Here's how it works:
+
+**API Configuration**: The function constructs the proper headers including the API key from environment variables, ensuring secure authentication with the Reka Vision service.
+
+**Request Payload**: It builds a structured JSON payload containing the `video_id` and a conversation message with the role "user" and a specific prompt asking for a funny, gentle roast in markdown format. This prompt engineering ensures consistent, appropriately-toned responses.
+
+**API Communication**: The function makes a POST request to the Video QA endpoint with a 30-second timeout to prevent hanging requests. It uses the JSON payload format expected by the Reka Vision QA API.
+
+**Error Handling & Resilience**: The function implements comprehensive error handling:
+- **JSON Parsing**: Attempts to parse the response as JSON even on non-2xx status codes to capture richer error information from the API
+- **HTTP Errors**: Detects non-successful HTTP status codes and adds appropriate error messages to the response data
+- **Timeout Protection**: Catches request timeouts and returns a user-friendly timeout message
+- **Exception Safety**: Uses broad exception catching to prevent unexpected errors from crashing the application
+
+**Response Processing**: On successful API calls, it returns the parsed JSON response which typically includes a `chat_response` field containing the AI-generated roast in markdown format. The function preserves all response fields for downstream processing while ensuring failed requests always include an 'error' key.
+
 Paste into `app.py` at the **STEP** marker for "Roast: markdown to HTML": replace the placeholder with this function:
 
 ```python
@@ -476,6 +494,22 @@ def simple_markdown_to_html(md: str) -> str:
     # Use 'extra' and 'sane_lists' extensions for better Markdown support
     return markdown.markdown(md, extensions=['extra', 'sane_lists'])
 ```
+
+#### 🔍 What the Code Does
+
+This utility function converts markdown text to HTML for safe display in the web browser. Here's what it accomplishes:
+
+**Markdown Processing**: Uses the robust Python-Markdown library to parse markdown syntax and convert it to properly formatted HTML. This handles common markdown elements like headers, bold/italic text, lists, links, and code blocks.
+
+**Extension Support**: Includes the 'extra' and 'sane_lists' extensions which provide enhanced markdown features:
+- **'extra'**: Adds support for tables, definition lists, footnotes, abbreviations, and other advanced markdown features
+- **'sane_lists'**: Improves list handling to be more intuitive and consistent with modern markdown parsers
+
+**Input Validation**: Checks for empty or null input and returns an empty string, preventing errors when processing undefined content.
+
+**Security**: The Python-Markdown library includes built-in HTML sanitization to help prevent XSS attacks, making it safer than manual string manipulation for markdown conversion.
+
+**Output Format**: Returns clean, standards-compliant HTML that can be directly inserted into the DOM using `innerHTML`, preserving the formatting and structure of the original markdown roast response.
 
 Paste into `app.py` at the **STEP** marker for "Roast API route (/api/process)": replace the placeholder with this route:
 
@@ -522,6 +556,25 @@ def process_video() -> Dict[str, Any]:
         fallback = "Unknown error: chat_response missing."
     return jsonify({"success": False, "error": fallback})
 ```
+
+#### 🔍 What the Code Does
+
+This Flask route serves as the main orchestrator for the video roasting feature, connecting the frontend request to the AI-powered response. Here's how it works:
+
+**Request Validation**: The route first validates that a `video_id` is provided in the JSON request body. If missing, it immediately returns an HTTP 400 error with a clear message, preventing unnecessary API calls.
+
+**API Integration**: It calls the `call_reka_vision_qa()` function to communicate with the Reka Vision API, passing the video ID and receiving the AI-generated roast response along with any metadata or error information.
+
+**Response Processing Logic**: The route implements a smart fallback hierarchy for handling different response scenarios:
+- **Primary Response**: If `chat_response` is present, it converts the markdown to HTML and returns a success response
+- **Fallback Messages**: If no chat response is available, it tries `system_message` then `error` from the API response
+- **Default Handling**: If none of the above are available, it provides a generic error message
+
+**Content Transformation**: For successful roasts, it uses the `simple_markdown_to_html()` function to convert the AI's markdown response into properly formatted HTML that can be safely displayed in the browser.
+
+**Error Handling**: The route provides consistent error responses in JSON format with `success: false` and descriptive error messages, ensuring the frontend can always parse and display appropriate feedback to users.
+
+**Response Format**: Returns standardized JSON responses with either `{"success": true, "result": html_content}` for successful roasts or `{"success": false, "error": error_message}` for failures, making frontend error handling straightforward.
 
 
 Now add the browser-side logic. Paste into `templates/form.html` at the **STEP** marker inside the existing `<script>` tag (do **NOT** add another `<script>` wrapper):
@@ -616,7 +669,34 @@ function watchVideo() {
 }
 ```
 
-```
+#### 🔍 What the Code Does
+
+This JavaScript code provides the complete frontend interaction logic for the video roasting feature. Here's how each function works:
+
+**`selectVideo(videoId)`** - Manages video selection from the grid:
+- **Visual Feedback**: Removes the 'selected' class from all video cards and adds it to the clicked card, providing clear visual indication of the current selection
+- **State Management**: Updates global variables `selectedVideoId` and `selectedVideoUrl` to track the user's choice
+- **UI State Updates**: Enables the "Roast Video" button once a video is selected and conditionally enables the "Watch Video" button if a valid URL is available
+- **UI Reset**: Hides any previous results or error messages to provide a clean slate for the new selection
+
+**`processVideo()`** - Handles the core roasting functionality:
+- **Validation**: Checks that a video is selected before proceeding
+- **UI Feedback**: Shows a loading spinner and disables the process button to prevent duplicate requests
+- **API Communication**: Makes an asynchronous POST request to `/api/process` with the selected video ID
+- **Response Handling**: On success, displays the HTML-formatted roast in the results section; on failure, shows appropriate error messages
+- **Cleanup**: Always hides the spinner and re-enables the button regardless of success or failure
+
+**`showError(message)`** - Provides consistent error display:
+- **User Feedback**: Updates the error message element with the provided text and makes it visible to the user
+- **Centralized Handling**: Ensures all error messages are displayed consistently across the application
+
+**`watchVideo()`** - Opens the original video for viewing:
+- **URL Validation**: Checks that a valid video URL is available before attempting to open it
+- **External Navigation**: Opens the video in a new browser tab, allowing users to watch the content that was roasted
+- **Error Handling**: Shows an appropriate error message if no URL is available for the selected video
+
+The code implements proper async/await patterns for API calls, comprehensive error handling, and intuitive user interface updates that provide immediate feedback for all user actions.
+
 
 ### 🔍 What the Roast Pieces Do
 
@@ -630,34 +710,27 @@ function watchVideo() {
 2. Select a video, click "Roast Video"
 3. See the playful commentary appear in the result panel
 
+![Final look](../../assets/roast-workshop-final.png)
+
 ## 💡 Ideas for Extending the App
 
-- **Stream the roast response** token-by-token for real-time feedback
-- **Add a history panel** of past roasts for each video
-- **Allow user-provided roast prompts** (e.g., funny, poetic, motivational)
-- **Add thumbnails** when they're available; improve "processing" placeholders
-- **Show upload progress** and validation of video URLs
-- **Add video categories** and filtering options
-- **Implement user authentication** for personal video collections
+- **Allow user-provided roast prompts** (e.g., funny, poetic, motivational) by making the prompt dynamic.
+- **Add the Delete Video** functionality using the [Reka Delete Video API](https://docs.reka.ai/vision/video-management#delete-videos).
+- **Add video categories** and filtering options, use [Reka's Metadata Tagging](https://docs.reka.ai/vision/metadata-tagging) API to auto-tag videos.
+- **Highlight Reel Generation**: Use [Reka's Highlight Reel API](https://docs.reka.ai/vision/highlight-reel-generation) to create short clips from longer videos.
+
 
 ## 🎉 Conclusion
 
-Congratulations! You've successfully built a fully functional AI-powered video roasting application using the Reka Vision API and Flask. 
+Congratulations! You've successfully built a fully functional AI-powered video roasting application using the Reka Vision API. 
 
 ### What You've Accomplished
 
-✅ **Environment Setup**: Configured Python, Flask, and API credentials  
 ✅ **Video Management**: Implemented video listing and uploading functionality  
 ✅ **AI Integration**: Connected to Reka Vision API for intelligent video analysis  
 ✅ **User Interface**: Created an interactive web interface with dynamic content  
 ✅ **Error Handling**: Implemented robust error handling and user feedback  
 
-### Key Takeaways
-
-- **API Integration**: You learned how to work with external Vision APIs for video processing
-- **Full-Stack Development**: You built both backend (Flask) and frontend (JavaScript/HTML) components
-- **Caching Strategies**: You implemented smart caching for better performance
-- **User Experience**: You created an intuitive interface with proper feedback mechanisms
 
 ### Next Steps
 
@@ -666,6 +739,7 @@ Now that you have a working foundation, consider:
 - **Adding authentication** to create personal video collections
 - **Implementing real-time features** like streaming responses
 - **Exploring other Reka Vision features** like video search and metadata tagging
+- join the [Reka Discord Community](https://link.reka.ai/discord) to share your project, ask question and get or give feedback.
 
 Happy coding! 🚀
 
