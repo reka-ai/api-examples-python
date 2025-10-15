@@ -20,23 +20,22 @@ By the end you will:
 
 ## Introduction to Reka Vision API
 
-This app talks to the Reka Vision APIs to:
+The Reka Vision API provides powerful video processing and analysis capabilities, enabling you to upload, manage, and interact with videos using AI-powered question answering. With feature like: 
 
-- List videos (via `POST {BASE_URL}/videos/get`)
-- Upload a video (via `POST https://vision-agent.api.reka.ai/videos/upload`)
-- Ask a Vision QA chat endpoint to “gently roast” a selected video (default `POST https://vision-agent.api.reka.ai/qa/chat`)
+- Video Management: Upload, retrieve, list, and delete videos
+- Video Search: Find videos using semantic search
+- Video Q&A: Ask questions about video content and get AI-powered answers with streaming support
+- Metadata Tagging: Generate tags for videos
+- Highlight Reel Generation: Generate shorter highlight reels from your longer videos
 
-All calls use your `X-Api-Key` header.
+This workshop will demonstrate three key API calls:
+- List videos 
+- Upload a video 
+- Ask a Vision QA chat to “gently roast” a selected video 
 
-## Overview of Reka Vision capabilities
+The security uses API keys passed in the `X-Api-Key` header. In a upcoming step you’ll get your own free key.
 
-High level (and relevant to this app):
-
-- Manage and index videos
-- Query a video with a chat-style prompt (we’ll send a “gentle roast” prompt)
-- Return a response you can display in HTML (we’ll convert the markdown reply to HTML)
-
-## Setting up the development environment
+# Setting up the development environment
 
 We’ll use Python 3.9+ with Flask. First move into the workshop folder, then create and activate a virtual environment, and install dependencies from the provided requirements file:
 
@@ -74,7 +73,21 @@ python app.py
 
 Open <http://127.0.0.1:5000> in your browser.
 
-## Looking at the sample app
+![Roast my Life App first look](../../assets/roast-workshop-app-first-look.png)
+
+As you noticed the app in the current status is not functional yet. Let's fix in the next steps.
+
+## Getting your API key
+
+You need a Reka API key with access to Vision features. Here how to key a FREE key:
+
+1. Go to the [Reka Platform dashboard](https://link.reka.ai/free)
+1. Open the API Keys section on the left
+1. Create a new key and copy it to your environment
+1. Add it to `.env` as `API_KEY`.
+
+
+# Making the App Dynamic
 
 Key files we’ll edit:
 
@@ -89,18 +102,10 @@ You’ll see STEP markers in these files, like:
 
 Paste the code from the matching step directly below those markers.
 
-## Getting your API key
-
-You need a Reka API key with access to Vision features. Here how to key a FREE key:
-
-1. Go to the [Reka Platform dashboard](https://link.reka.ai/free)
-1. Open the API Keys section on the left
-1. Create a new key and copy it to your environment
-1. Add it to `.env` as `API_KEY`.
 
 ## Adding your own videos
 
-In this step you’ll enable the “Add Video” popup to upload a video URL to the Reka API. This is handled by the `/api/upload_video` route in `app.py`.
+Before you can roast a video, you need to add one (or more) first. In this step you’ll enable the “Add Video” popup to upload a video URL to the Reka API. This is handled by the `/api/upload_video` route in `app.py`.
 
 Paste into `app.py` at the STEP marker for “Add your own videos (Upload API route)”: replace the placeholder route with the following complete function:
 
@@ -131,7 +136,7 @@ def upload_video() -> Dict[str, Any]:
     # Call Reka API to upload video
     try:
         response = requests.post(
-            "https://vision-agent.api.reka.ai/videos/upload",
+            f"{base_url.rstrip('/')}/videos/upload",
             headers={
                 "X-Api-Key": api_key
             },
@@ -169,14 +174,27 @@ def upload_video() -> Dict[str, Any]:
         return jsonify({"success": False, "error": f"Upload failed: {str(e)}"}), 500
 ```
 
-What it does:
+### What the code does
 
-- Validates inputs (`video_name`, `video_url`)
-- Calls the Reka upload endpoint with your API key
-- On success, clears the local cache and returns the new `video_id`
-- Surfaces errors returned by the API
+This code validates your request and credentials, forwards the upload to Reka Vision, and handles success, API errors, and timeouts in a user-friendly way. 
+
+It first checks that both `video_name` and `video_url` are present (otherwise it returns HTTP 400 with `{ "error": "Both video_name and video_url are required" }`). It also verifies that `API_KEY` is configured; if not, it returns HTTP 500 with `{ "error": "API key not configured" }`.
+
+For the upload itself, it issues a `POST` to `{base_url}/videos/upload` with your API key in the `X-Api-Key` header. The body is form-encoded (because `requests` uses `application/x-www-form-urlencoded` when `data=` is provided) and includes `video_name`, `video_url`, and `index=true`. The `index=true` flag is required—it tells the server to process and index the video for search/QA. The request times out after 30 seconds.
+
+The response is parsed as JSON when possible; if the body isn’t JSON, it’s treated as an empty object to avoid crashes. On success (any 2xx), the handler invalidates the local cache by setting `_VIDEO_CACHE["timestamp"] = 0.0` so the next list fetch refetches from the API, and returns HTTP 200 with `{ success: true, video_id, message: "Video uploaded successfully" }` (falling back to `video_id: "unknown"` if it’s missing upstream). If the API returns a non‑2xx, it surfaces the upstream `error` or `message` when available; otherwise it shows `HTTP <status>` and propagates that same status (e.g., 400/401/403/4xx/5xx).
+
+- Timeout: returns HTTP 504 with `{ success: false, error: "Request timed out" }` if the upload exceeds 30s.
+- Unexpected exceptions: returns HTTP 500 with `{ success: false, error: "Upload failed: <details>" }`.
+
+Notes:
+- Cache invalidation only flips the timestamp; the list refreshes on the next fetch.
+- No deduplication or retries are attempted; uploading the same URL twice depends on server behavior.
 
 Try it: run the app, open the “Roast a Video” page, click “Add Video”, enter a name and URL, then Upload. On success the grid will refresh after a reload.
+
+!!!!!
+
 
 ## Listing videos dynamically
 
@@ -254,6 +272,7 @@ def call_reka_vision_qa(video_id: str) -> Dict[str, Any]:
 
     Environment Variables:
         REKA_VIDEO_QA_ENDPOINT: Optional override for the API endpoint.
+            If not set, defaults to {base_url}/qa/chat
         api_key or API_KEY: API key placed in the X-Api-Key header.
 
     Parameters:

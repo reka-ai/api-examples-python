@@ -13,10 +13,10 @@ api_key = os.environ.get('API_KEY')
 base_url = os.environ.get('BASE_URL')
 
 # Endpoint for the external chat/vision agent API. If needed this can be
-# overridden via env; otherwise we default to the value provided by the user
-# request specification.
+# overridden via env; otherwise we default to using base_url + /qa/chat
 REKA_VIDEO_QA_ENDPOINT = os.environ.get(
-    'REKA_VIDEO_QA_ENDPOINT', 'https://vision-agent.api.reka.ai/qa/chat'
+    'REKA_VIDEO_QA_ENDPOINT', 
+    f"{base_url.rstrip('/')}/qa/chat"
 )
 
 # Simple in-memory cache for videos to avoid hitting the API on every request.
