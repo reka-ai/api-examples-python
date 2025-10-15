@@ -107,6 +107,8 @@ Paste the code from the matching step directly below those markers.
 
 Before you can roast a video, you need to add one (or more) first. In this step you’ll enable the “Add Video” popup to upload a video URL to the Reka API. This is handled by the `/api/upload_video` route in `app.py`.
 
+### Backend: Upload API route
+
 Paste into `app.py` at the STEP marker for “Add your own videos (Upload API route)”: replace the placeholder route with the following complete function:
 
 ```python
@@ -174,7 +176,7 @@ def upload_video() -> Dict[str, Any]:
         return jsonify({"success": False, "error": f"Upload failed: {str(e)}"}), 500
 ```
 
-### What the code does
+#### What the code does
 
 This code validates your request and credentials, forwards the upload to Reka Vision, and handles success, API errors, and timeouts in a user-friendly way. 
 
@@ -191,7 +193,83 @@ Notes:
 - Cache invalidation only flips the timestamp; the list refreshes on the next fetch.
 - No deduplication or retries are attempted; uploading the same URL twice depends on server behavior.
 
-Try it: run the app, open the “Roast a Video” page, click “Add Video”, enter a name and URL, then Upload. On success the grid will refresh after a reload.
+
+### Frontend: Upload popup
+
+Next, enable the “Add Video” popup to call this route. Paste into `templates/form.html` at the STEP marker "Add video popup interactions" inside the existing `<script>`.
+
+```javascript
+// Show the Add Video popup form
+function showAddVideoPopup() {
+  document.getElementById('addVideoPopup').style.display = 'flex';
+  document.getElementById('videoName').value = '';
+  document.getElementById('videoUrl').value = '';
+  document.getElementById('popupError').textContent = '';
+}
+
+// Hide the Add Video popup form
+function hideAddVideoPopup() {
+  document.getElementById('addVideoPopup').style.display = 'none';
+}
+
+// Upload a new video to the Reka API via the backend
+async function uploadVideo() {
+  const name = document.getElementById('videoName').value.trim();
+  const url = document.getElementById('videoUrl').value.trim();
+  const errorDiv = document.getElementById('popupError');
+
+  errorDiv.textContent = '';
+
+  if (!name || !url) {
+    errorDiv.textContent = 'Please enter both name and video URL.';
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/upload_video', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        video_name: name,
+        video_url: url
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      hideAddVideoPopup();
+      // Reload the page to show the new video
+      location.reload();
+    } else {
+      errorDiv.textContent = data.error || 'Failed to upload video.';
+    }
+  } catch (err) {
+    errorDiv.textContent = 'Error: ' + err.message;
+  }
+}
+```
+
+#### What the code does
+
+This JavaScript code provides the frontend functionality for the "Add Video" popup form. It consists of three main functions:
+
+1. **`showAddVideoPopup()`** - Opens the video upload popup by setting its display style to 'flex', clears any previous form values (video name and URL inputs), and resets any error messages to provide a clean slate for the user.
+
+2. **`hideAddVideoPopup()`** - Closes the popup by hiding it (setting display to 'none'), typically called after a successful upload or when the user cancels.
+
+3. **`uploadVideo()`** - Handles the actual video upload process:
+   - Validates that both name and URL fields are filled out
+   - Makes an asynchronous POST request to the `/api/upload_video` backend endpoint, added previously.
+   - Sends the video data as JSON with `video_name` and `video_url` fields
+   - On success: closes the popup and reloads the page to show the newly added video in the grid
+   - On failure: displays the error message in the popup without closing it, allowing the user to correct the issue and retry
+
+The code includes proper error handling for both validation (empty fields) and network issues (API failures), providing user-friendly feedback through the `popupError` element.
+
+Try it: run the app, open the "Roast a Video" page, click "Add Video", enter a name and URL, then Upload. On success the grid will try to refresh but some code is still missing to list videos dynamically. Next step we’ll fix that.
 
 !!!!!
 
@@ -392,60 +470,9 @@ def process_video() -> Dict[str, Any]:
 Now add the browser-side logic. Paste into `templates/form.html` at the STEP marker inside the existing `<script>` tag (do NOT add another `<script>` wrapper):
 
 ```javascript
-let selectedVideoId = null;
-let selectedVideoUrl = null;
 
-// Show the Add Video popup form
-function showAddVideoPopup() {
-  document.getElementById('addVideoPopup').style.display = 'flex';
-  document.getElementById('videoName').value = '';
-  document.getElementById('videoUrl').value = '';
-  document.getElementById('popupError').textContent = '';
-}
 
-// Hide the Add Video popup form
-function hideAddVideoPopup() {
-  document.getElementById('addVideoPopup').style.display = 'none';
-}
 
-// Upload a new video to the Reka API via the backend
-async function uploadVideo() {
-  const name = document.getElementById('videoName').value.trim();
-  const url = document.getElementById('videoUrl').value.trim();
-  const errorDiv = document.getElementById('popupError');
-
-  errorDiv.textContent = '';
-
-  if (!name || !url) {
-    errorDiv.textContent = 'Please enter both name and video URL.';
-    return;
-  }
-
-  try {
-    const response = await fetch('/api/upload_video', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        video_name: name,
-        video_url: url
-      })
-    });
-
-    const data = await response.json();
-
-    if (response.ok && data.success) {
-      hideAddVideoPopup();
-      // Reload the page to show the new video
-      location.reload();
-    } else {
-      errorDiv.textContent = data.error || 'Failed to upload video.';
-    }
-  } catch (err) {
-    errorDiv.textContent = 'Error: ' + err.message;
-  }
-}
 
 // Handle video selection from the grid
 function selectVideo(videoId) {
