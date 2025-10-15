@@ -269,9 +269,9 @@ This JavaScript code provides the frontend functionality for the "Add Video" pop
 
 The code includes proper error handling for both validation (empty fields) and network issues (API failures), providing user-friendly feedback through the `popupError` element.
 
-Try it: run the app, open the "Roast a Video" page, click "Add Video", enter a name and URL, then Upload. On success the grid will try to refresh but some code is still missing to list videos dynamically. Next step we’ll fix that.
+![Upload popup](../../assets/roast-workshop-upload.png)
 
-!!!!!
+Try it: run the app, open the "Roast a Video" page, click "Add Video", enter a name and URL, then Upload. On success the grid will try to refresh but some code is still missing to list videos dynamically. Next step we’ll fix that.
 
 
 ## Listing videos dynamically
