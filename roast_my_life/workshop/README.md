@@ -1,100 +1,143 @@
 # Roast My Life: AI Commentary on Your Camera Roll - Workshop
 
-Ever wanted an AI best friend to comment on your terrible life choices? Now you can build one. In this workshop you’ll build a small Flask app that lists your videos from Reka Vision, lets you add new ones, and sends one to a Vision QA endpoint for a gentle roast. You’ll paste the code step-by-step into placeholders inside the app.
+Ever wanted an AI best friend to comment on your terrible life choices? Now you can build one! 
 
-Important: In this workshop you will copy/paste the exact code provided in each step into the placeholders in:
+In this workshop, you'll build a small Flask app that:
+- Lists your videos from Reka Vision
+- Lets you add new videos
+- Sends a selected video to a Vision QA endpoint for a gentle roast
 
+You'll paste the code step-by-step into placeholders inside the app to make it fully functional.
+
+## 📚 Table of Contents
+
+1. [📋 Important Instructions](#📋-important-instructions)
+2. [🎯 Workshop Agenda](#🎯-workshop-agenda)
+3. [🔍 Introduction to Reka Vision API](#🔍-introduction-to-reka-vision-api)
+4. [🚀 Setting Up the Development Environment](#🚀-setting-up-the-development-environment)
+5. [🔑 Getting Your API Key](#🔑-getting-your-api-key)
+6. [💻 Making the App Dynamic](#💻-making-the-app-dynamic)
+7. [📤 Adding Your Own Videos](#📤-adding-your-own-videos)
+8. [📋 Listing Videos Dynamically](#📋-listing-videos-dynamically)
+9. [🔥 Add the Roasting Functionality](#🔥-add-the-roasting-functionality)
+10. [💡 Ideas for Extending the App](#💡-ideas-for-extending-the-app)
+11. [🎉 Conclusion](#🎉-conclusion)
+
+## 📋 Important Instructions
+
+In this workshop you will copy/paste the exact code provided in each step into the placeholders in:
 - `app.py`
 - `templates/form.html`
 
-If something already exists in those files and duplicates what you’re asked to paste, it’s because we removed it to make the workshop hands-on. Just paste the code exactly where indicated by the STEP markers.
+If something already exists in those files and duplicates what you're asked to paste, it's because we removed it to make the workshop hands-on. Just paste the code exactly where indicated by the **STEP** markers.
 
-## Workshop Agenda
+## 🎯 Workshop Agenda
 
-By the end you will:
+By the end of this workshop, you will:
+- ✅ Prepare the Python environment and configure credentials
+- ✅ Explore the app structure
+- ✅ Implement functionality to list videos, upload videos, and roast a selected video
+- ✅ Run the app locally and explore ideas to extend it
 
-- Prepare the Python environment and configure credentials
-- Explore the app structure
-- Paste the code to: list videos, upload videos, and roast a selected video
-- Run it locally and try ideas to extend it
+## 🔍 Introduction to Reka Vision API
 
-## Introduction to Reka Vision API
+The Reka Vision API provides powerful video processing and analysis capabilities, enabling you to upload, manage, and interact with videos using AI-powered question answering. 
 
-The Reka Vision API provides powerful video processing and analysis capabilities, enabling you to upload, manage, and interact with videos using AI-powered question answering. With feature like: 
+### Key Features
+- **Video Management**: Upload, retrieve, list, and delete videos
+- **Video Search**: Find videos using semantic search
+- **Video Q&A**: Ask questions about video content and get AI-powered answers with streaming support
+- **Metadata Tagging**: Generate tags for videos
+- **Highlight Reel Generation**: Generate shorter highlight reels from your longer videos
 
-- Video Management: Upload, retrieve, list, and delete videos
-- Video Search: Find videos using semantic search
-- Video Q&A: Ask questions about video content and get AI-powered answers with streaming support
-- Metadata Tagging: Generate tags for videos
-- Highlight Reel Generation: Generate shorter highlight reels from your longer videos
-
+### Workshop Focus
 This workshop will demonstrate three key API calls:
-- List videos 
-- Upload a video 
-- Ask a Vision QA chat to “gently roast” a selected video 
+1. **List videos** - Retrieve existing videos from your account
+2. **Upload a video** - Add new videos via URL
+3. **Ask a Vision QA chat** - Generate a "gentle roast" of a selected video
 
-The security uses API keys passed in the `X-Api-Key` header. In a upcoming step you’ll get your own free key.
+### Authentication
+The API uses secure authentication with API keys passed in the `X-Api-Key` header. In an upcoming step, you'll get your own free key.
 
-# Setting up the development environment
+# 🚀 Setting Up the Development Environment
 
-We’ll use Python 3.9+ with Flask. First move into the workshop folder, then create and activate a virtual environment, and install dependencies from the provided requirements file:
+We'll use Python 3.9+ with Flask for this workshop.
+
+## Step 1: Navigate to Workshop Directory
+
+From the repository root, navigate to the workshop folder:
 
 ```bash
-# From the repo root
 cd roast_my_life/workshop
+```
 
-# Create virtual environment and install dependencies
+## Step 2: Create Python Virtual Environment
+
+Create and activate a virtual environment, then install dependencies:
+
+```bash
+# Create virtual environment
 python3 -m venv .venv
+
+# Activate virtual environment
 source .venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-Environment variables: this app reads settings from a `.env` file. A ready-to-edit sample is provided as `.env-sample`.
+## Step 3: Configure Environment Variables
 
-Create your `.env` by copying the sample and then edit the values:
+This app reads settings from a `.env` file. A ready-to-edit sample is provided as `.env-sample`.
+
+Create your `.env` file:
 
 ```bash
 cp .env-sample .env
 ```
 
-Edit `.env` (same keys as below):
+Edit the `.env` file with your configuration:
 
 ```env
 API_KEY=YOUR_REKA_API_KEY
 BASE_URL=https://vision-agent.api.reka.ai
 ```
 
-Run the app:
+## Step 4: Run the Application
+
+Start the Flask development server:
 
 ```bash
 python app.py
 # App starts on http://127.0.0.1:5000
 ```
 
-Open <http://127.0.0.1:5000> in your browser.
+Open <http://127.0.0.1:5000> in your browser to see the application.
 
 ![Roast my Life App first look](../../assets/roast-workshop-app-first-look.png)
 
-As you noticed the app in the current status is not functional yet. Let's fix in the next steps.
+> **Note**: The app is not functional yet in its current state. We'll fix this in the following steps!
 
-## Getting your API key
+## 🔑 Getting Your API Key
 
-You need a Reka API key with access to Vision features. Here how to key a FREE key:
+You need a Reka API key with access to Vision features. Here's how to get a **FREE** key:
 
 1. Go to the [Reka Platform dashboard](https://link.reka.ai/free)
-1. Open the API Keys section on the left
-1. Create a new key and copy it to your environment
-1. Add it to `.env` as `API_KEY`.
+2. Open the **API Keys** section on the left
+3. Create a new key and copy it to your environment
+4. Add it to `.env` as `API_KEY`
 
 
-# Making the App Dynamic
+# 💻 Making the App Dynamic
 
-Key files we’ll edit:
+In this section, we'll add the core functionality to make the app interactive and fully functional.
 
-- `app.py` — Flask server, routes and API calls
-- `templates/form.html` — UI for selecting/adding videos and invoking the roast
+## Key Files We'll Edit
 
-You’ll see STEP markers in these files, like:
+- **`app.py`** — Flask server, routes and API calls
+- **`templates/form.html`** — UI for selecting/adding videos and invoking the roast
+
+You'll see **STEP** markers in these files, like:
 
 ```text
 # STEP: Listing videos dynamically — paste function from README below
@@ -103,13 +146,13 @@ You’ll see STEP markers in these files, like:
 Paste the code from the matching step directly below those markers.
 
 
-## Adding your own videos
+## 📤 Adding Your Own Videos
 
-Before you can roast a video, you need to add one (or more) first. In this step you’ll enable the “Add Video” popup to upload a video URL to the Reka API. This is handled by the `/api/upload_video` route in `app.py`.
+Before you can roast a video, you need to add one (or more) first. In this step, you'll enable the "Add Video" popup to upload a video URL to the Reka API. This functionality is handled by the `/api/upload_video` route in `app.py`.
 
-### Backend: Upload API route
+### Backend: Upload API Route
 
-Paste into `app.py` at the STEP marker for “Add your own videos (Upload API route)”: replace the placeholder route with the following complete function:
+Paste into `app.py` at the **STEP** marker for "Add your own videos (Upload API route)": replace the placeholder route with the following complete function:
 
 ```python
 @app.route('/api/upload_video', methods=['POST'])
@@ -176,7 +219,7 @@ def upload_video() -> Dict[str, Any]:
         return jsonify({"success": False, "error": f"Upload failed: {str(e)}"}), 500
 ```
 
-#### What the code does
+#### 🔍 What the Code Does
 
 This code validates your request and credentials, forwards the upload to Reka Vision, and handles success, API errors, and timeouts in a user-friendly way. 
 
@@ -194,9 +237,9 @@ Notes:
 - No deduplication or retries are attempted; uploading the same URL twice depends on server behavior.
 
 
-### Frontend: Upload popup
+### Frontend: Upload Popup
 
-Next, enable the “Add Video” popup to call this route. Paste into `templates/form.html` at the STEP marker "Add video popup interactions" inside the existing `<script>`.
+Next, enable the "Add Video" popup to call this route. Paste into `templates/form.html` at the **STEP** marker "Add video popup interactions" inside the existing `<script>`.
 
 ```javascript
 // Show the Add Video popup form
@@ -252,7 +295,7 @@ async function uploadVideo() {
 }
 ```
 
-#### What the code does
+#### 🔍 What the Code Does
 
 This JavaScript code provides the frontend functionality for the "Add Video" popup form. It consists of three main functions:
 
@@ -271,16 +314,15 @@ The code includes proper error handling for both validation (empty fields) and n
 
 ![Upload popup](../../assets/roast-workshop-upload.png)
 
-#### Try it
+#### ✅ Try It
 
-Execute the command `python app.py` to run the app, open the "Roast a Video" page, click "Add Video", enter a name and URL, then Upload. On success the grid will try to refresh but some code is still missing to list videos dynamically. Next step we’ll fix that.
+Execute the command `python app.py` to run the app, open the "Roast a Video" page, click "Add Video", enter a name and URL, then Upload. On success the grid will try to refresh but some code is still missing to list videos dynamically. Next step we'll fix that.
 
+## 📋 Listing Videos Dynamically
 
-### Listing videos dynamically
+Next, enable dynamic video listing by fetching from the API and handling a simplified list to the template.
 
-Next, enable dynamic video listing by fetching from the API and handing a simplified list to the template.
-
-Paste into `app.py` at the STEP marker for “Listing videos dynamically — fetch_videos()”: replace the placeholder with the following function:
+Paste into `app.py` at the **STEP** marker for "Listing videos dynamically — fetch_videos()": replace the placeholder with the following function:
 
 ```python
 def fetch_videos() -> List[Dict[str, Any]]:
@@ -323,7 +365,7 @@ def fetch_videos() -> List[Dict[str, Any]]:
         return []
 ```
 
-#### What the code does
+#### 🔍 What the Code Does
 
 This function implements a smart caching mechanism for fetching videos from the Reka Vision API. Here's how it works:
 
@@ -339,21 +381,20 @@ This function implements a smart caching mechanism for fetching videos from the 
 
 **Return Value**: The function always returns a list of video dictionaries, either from a fresh API call, from cache, or an empty list if no data is available and the API is unreachable.
 
-#### Try it
+#### ✅ Try It
 
-Launch the app with `python app.py`, open the "Roast a Video" page, and you should see the grid populated with the video you uploaded in the previous step. The video is fetched from the Reka Vision API. 
+Launch the app with `python app.py`, open the "Roast a Video" page, and you should see the grid populated with the video you uploaded in the previous step. The video is fetched from the Reka Vision API.
 
+## 🔥 Add the Roasting Functionality
 
-### Add the roasting functionality
+Finally, wire up the roast functionality! This has four main parts:
 
-Finally, wire up the roast. This has three parts:
+1. **A function to call the Vision QA endpoint**
+2. **A function to convert markdown to HTML for display**
+3. **A Flask route that glues it together and returns the result to the browser**
+4. **Front-end JavaScript to select a video, call the backend, and show the response**
 
-1. A function to call the Vision QA endpoint
-2. A function to convert markdown to HTML for display
-3. A Flask route that glues it together and returns the result to the browser
-4. Front-end JavaScript to select a video, call the backend, and show the response
-
-Paste into `app.py` at the STEP marker for “Roast: Vision QA call (backend)”: replace the placeholder with this function:
+Paste into `app.py` at the **STEP** marker for "Roast: Vision QA call (backend)": replace the placeholder with this function:
 
 ```python
 def call_reka_vision_qa(video_id: str) -> Dict[str, Any]:
@@ -413,7 +454,7 @@ def call_reka_vision_qa(video_id: str) -> Dict[str, Any]:
         return {"error": f"Chat API call failed: {e}"}
 ```
 
-Paste into `app.py` at the STEP marker for “Roast: markdown to HTML”: replace the placeholder with this function:
+Paste into `app.py` at the **STEP** marker for "Roast: markdown to HTML": replace the placeholder with this function:
 
 ```python
 def simple_markdown_to_html(md: str) -> str:
@@ -436,7 +477,7 @@ def simple_markdown_to_html(md: str) -> str:
     return markdown.markdown(md, extensions=['extra', 'sane_lists'])
 ```
 
-Paste into `app.py` at the STEP marker for “Roast API route (/api/process)”: replace the placeholder with this route:
+Paste into `app.py` at the **STEP** marker for "Roast API route (/api/process)": replace the placeholder with this route:
 
 ```python
 @app.route('/api/process', methods=['POST'])
@@ -483,7 +524,7 @@ def process_video() -> Dict[str, Any]:
 ```
 
 
-Now add the browser-side logic. Paste into `templates/form.html` at the STEP marker inside the existing `<script>` tag (do NOT add another `<script>` wrapper):
+Now add the browser-side logic. Paste into `templates/form.html` at the **STEP** marker inside the existing `<script>` tag (do **NOT** add another `<script>` wrapper):
 
 ```javascript
 
@@ -575,23 +616,56 @@ function watchVideo() {
 }
 ```
 
-What the roast pieces do:
+```
 
-- Backend calls Vision QA with your `video_id` and a roast-style prompt
+### 🔍 What the Roast Pieces Do
+
+- **Backend** calls Vision QA with your `video_id` and a roast-style prompt
 - It returns `chat_response` (markdown) or an error; we convert markdown to HTML
-- Front-end selects a video card, calls `/api/process`, and injects the HTML into the page
+- **Front-end** selects a video card, calls `/api/process`, and injects the HTML into the page
 
-Try it:
+### ✅ Try It
 
-1) Start the app and open the form page
-2) Select a video, click “Roast Video”
-3) See the playful commentary appear in the result panel
+1. Start the app and open the form page
+2. Select a video, click "Roast Video"
+3. See the playful commentary appear in the result panel
 
-## ideas for extending the app
+## 💡 Ideas for Extending the App
 
-- Stream the roast response token-by-token
-- Add a history panel of past roasts
-- Allow user-provided roast prompts (e.g., funny, poetic, motivational)
-- Add thumbnails when they’re available; improve “processing” placeholders
-- Show upload progress and validation of video URLs
+- **Stream the roast response** token-by-token for real-time feedback
+- **Add a history panel** of past roasts for each video
+- **Allow user-provided roast prompts** (e.g., funny, poetic, motivational)
+- **Add thumbnails** when they're available; improve "processing" placeholders
+- **Show upload progress** and validation of video URLs
+- **Add video categories** and filtering options
+- **Implement user authentication** for personal video collections
+
+## 🎉 Conclusion
+
+Congratulations! You've successfully built a fully functional AI-powered video roasting application using the Reka Vision API and Flask. 
+
+### What You've Accomplished
+
+✅ **Environment Setup**: Configured Python, Flask, and API credentials  
+✅ **Video Management**: Implemented video listing and uploading functionality  
+✅ **AI Integration**: Connected to Reka Vision API for intelligent video analysis  
+✅ **User Interface**: Created an interactive web interface with dynamic content  
+✅ **Error Handling**: Implemented robust error handling and user feedback  
+
+### Key Takeaways
+
+- **API Integration**: You learned how to work with external Vision APIs for video processing
+- **Full-Stack Development**: You built both backend (Flask) and frontend (JavaScript/HTML) components
+- **Caching Strategies**: You implemented smart caching for better performance
+- **User Experience**: You created an intuitive interface with proper feedback mechanisms
+
+### Next Steps
+
+Now that you have a working foundation, consider:
+- **Deploying your app** to a cloud platform like Heroku or Vercel
+- **Adding authentication** to create personal video collections
+- **Implementing real-time features** like streaming responses
+- **Exploring other Reka Vision features** like video search and metadata tagging
+
+Happy coding! 🚀
 
