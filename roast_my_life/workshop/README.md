@@ -271,10 +271,12 @@ The code includes proper error handling for both validation (empty fields) and n
 
 ![Upload popup](../../assets/roast-workshop-upload.png)
 
-Try it: run the app, open the "Roast a Video" page, click "Add Video", enter a name and URL, then Upload. On success the grid will try to refresh but some code is still missing to list videos dynamically. Next step we’ll fix that.
+#### Try it
+
+Execute the command `python app.py` to run the app, open the "Roast a Video" page, click "Add Video", enter a name and URL, then Upload. On success the grid will try to refresh but some code is still missing to list videos dynamically. Next step we’ll fix that.
 
 
-## Listing videos dynamically
+### Listing videos dynamically
 
 Next, enable dynamic video listing by fetching from the API and handing a simplified list to the template.
 
@@ -321,15 +323,28 @@ def fetch_videos() -> List[Dict[str, Any]]:
         return []
 ```
 
-This function:
+#### What the code does
 
-- Calls `{BASE_URL}/videos/get` with your API key
-- Caches results briefly to avoid repeated calls
-- Returns a list of videos used by the template (already wired in `form_page()`)
+This function implements a smart caching mechanism for fetching videos from the Reka Vision API. Here's how it works:
 
-You don’t need to change the Jinja template loop — it already iterates over `videos`.
+**Caching Logic**: The function first checks if the cached data is still fresh by comparing the current time with the cached timestamp plus the TTL (time-to-live). If the cache is stale or empty, it proceeds to fetch fresh data from the API.
 
-## Add the roasting functionality
+**API Configuration**: Before making the request, it validates that `base_url` is configured (returns empty list if not). It constructs the API endpoint URL by appending `/videos/get` to the base URL, and prepares headers with the API key if available.
+
+**API Call**: The function makes a POST request to the Reka Vision API's `/videos/get` endpoint with a 10-second timeout. It expects a JSON response containing a "results" key with an array of video objects.
+
+**Error Handling & Resilience**: If the API call fails (network issues, timeouts, or API errors), the function gracefully falls back to serving cached data if available. This ensures the app remains functional even when the API is temporarily unavailable.
+
+**Cache Management**: On successful API responses, it updates the cache with both the current timestamp and the fresh results, ensuring subsequent requests within the TTL period are served instantly from cache rather than hitting the API.
+
+**Return Value**: The function always returns a list of video dictionaries, either from a fresh API call, from cache, or an empty list if no data is available and the API is unreachable.
+
+#### Try it
+
+Launch the app with `python app.py`, open the "Roast a Video" page, and you should see the grid populated with the video you uploaded in the previous step. The video is fetched from the Reka Vision API. 
+
+
+### Add the roasting functionality
 
 Finally, wire up the roast. This has three parts:
 
@@ -467,12 +482,10 @@ def process_video() -> Dict[str, Any]:
     return jsonify({"success": False, "error": fallback})
 ```
 
+
 Now add the browser-side logic. Paste into `templates/form.html` at the STEP marker inside the existing `<script>` tag (do NOT add another `<script>` wrapper):
 
 ```javascript
-
-
-
 
 // Handle video selection from the grid
 function selectVideo(videoId) {
