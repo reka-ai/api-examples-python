@@ -14,14 +14,14 @@ This repository showcases how to use the **Reka Research** to build intelligent 
 
 ## 📚 What's in this repo
 
-| Folder/File                                | Description                                                                                          |
-|--------------------------------------------|------------------------------------------------------------------------------------------------------|
-| `Use Reka Research with OpenAI SDK.ipynb`  | Example notebook using the OpenAI SDK to call the Reka API                                           |
-| `Use Reka Research with requests.ipynb`    | Example notebook using raw HTTP requests to call the Reka API                                        |
-| `gradio/`                                  | Gradio app that streams responses and displays reasoning steps                                       |
-| `streamlit/`                               | Streamlit app that streams responses and displays reasoning steps                                    |
-| `event_finder/`                            | Streamlit app for researching and finding events with Reka Research                                  |
-| `roast_my_life/`                           | A playful Python + Flask demo showcasing Reka Vision API to (nicely) roast the people in your videos |
+| Example                                           | Description                                                                                        |
+|---------------------------------------------------|----------------------------------------------------------------------------------------------------|
+| [notebook-openai/](/notebook-openai/README.md)    | Example notebook using the OpenAI SDK to call the Reka API                                        |
+| [notebook-request/](/notebook-request/README.md)  | Example notebook using raw HTTP requests to call the Reka API                                     |
+| [gradio/](/gradio/README.md)                      | Gradio app that streams responses and displays reasoning steps                                     |
+| [streamlit/](/streamlit/README.md)                | Streamlit app that streams responses and displays reasoning steps                                  |
+| [event_finder/](/event_finder/README.md)          | Streamlit app for researching and finding events with Reka Research                               |
+| [roast_my_life/](/roast_my_life/README.md)        | A playful Python + Flask demo showcasing Reka Vision API to (nicely) roast the people in your videos |
 
 ## 🧪 Why use this repo?
 
