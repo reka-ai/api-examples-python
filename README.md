@@ -23,6 +23,13 @@ This repository showcases how to use the **Reka Research** to build intelligent 
 | [event_finder/](/event_finder/README.md)          | Streamlit app for researching and finding events with Reka Research                               |
 | [roast_my_life/](/roast_my_life/README.md)        | A playful Python + Flask demo showcasing Reka Vision API to (nicely) roast the people in your videos |
 
+
+### 🧑‍💻 Workshops & Tutorials
+
+| Workshop & Tutorial                              | Description                                                                                        |
+|--------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
+| [Roast my Life Workshop](/roast_my_life/workshop/README.md)  | Build a fully functional AI-powered video roasting application using the Reka Vision API in a step-by-step workshop |
+
 ## 🧪 Why use this repo?
 
 - Learn how to use Reka Research with requests and OpenAI SDK
