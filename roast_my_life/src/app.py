@@ -275,8 +275,28 @@ def process_video() -> Dict[str, Any]:
     api_error = api_data.get('error')
 
     if chat_response:
-        # Convert Markdown roast text to HTML for display.
-        html_result = simple_markdown_to_html(chat_response)
+        roast_content = chat_response
+
+        # Parse the JSON string to extract section content
+        if isinstance(chat_response, str):
+            try:
+                import json
+                parsed = json.loads(chat_response)
+                if isinstance(parsed, dict) and 'sections' in parsed:
+                    sections = parsed.get('sections', [])
+                    content_parts = []
+                    for section in sections:
+                        if isinstance(section, dict) and 'section_content' in section:
+                            content_parts.append(section['section_content'])
+
+                    if content_parts:
+                        roast_content = '\n\n'.join(content_parts)
+            except (json.JSONDecodeError, ValueError):
+                # If parsing fails, use the raw string as-is
+                pass
+
+        # Convert Markdown roast text to HTML for display
+        html_result = simple_markdown_to_html(roast_content)
         return jsonify({"success": True, "result": html_result})
 
     # No chat_response; decide best fallback.
@@ -288,4 +308,4 @@ def process_video() -> Dict[str, Any]:
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=8111)

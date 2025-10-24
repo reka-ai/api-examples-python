@@ -236,8 +236,65 @@ nav ul li a.active {
     background-color: #fff;
     padding: 1.5rem;
     border-radius: 6px;
-    white-space: pre-line;
     color: #2E2F2F;
+    max-height: 500px;
+    overflow-y: auto;
+    line-height: 1.8;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.result-content p {
+    margin-bottom: 1rem;
+}
+
+.result-content p:last-child {
+    margin-bottom: 0;
+}
+
+.result-content ul, .result-content ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.result-content li {
+    margin-bottom: 0.5rem;
+}
+
+.result-content h1, .result-content h2, .result-content h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #203F72;
+}
+
+.result-content h1:first-child,
+.result-content h2:first-child,
+.result-content h3:first-child {
+    margin-top: 0;
+}
+
+.result-content code {
+    background-color: #F1EEE7;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
+
+.result-content pre {
+    background-color: #F1EEE7;
+    padding: 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+}
+
+.result-content blockquote {
+    border-left: 4px solid #2276FF;
+    padding-left: 1rem;
+    margin-left: 0;
+    margin-bottom: 1rem;
+    color: #403E34;
+    font-style: italic;
 }
 
 /* Loading Spinner */

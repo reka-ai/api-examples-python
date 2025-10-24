@@ -546,8 +546,28 @@ def process_video() -> Dict[str, Any]:
     api_error = api_data.get('error')
 
     if chat_response:
-        # Convert Markdown roast text to HTML for display.
-        html_result = simple_markdown_to_html(chat_response)
+        roast_content = chat_response
+
+        # Parse the JSON string to extract section content
+        if isinstance(chat_response, str):
+            try:
+                import json
+                parsed = json.loads(chat_response)
+                if isinstance(parsed, dict) and 'sections' in parsed:
+                    sections = parsed.get('sections', [])
+                    content_parts = []
+                    for section in sections:
+                        if isinstance(section, dict) and 'section_content' in section:
+                            content_parts.append(section['section_content'])
+
+                    if content_parts:
+                        roast_content = '\n\n'.join(content_parts)
+            except (json.JSONDecodeError, ValueError):
+                # If parsing fails, use the raw string as-is
+                pass
+
+        # Convert Markdown roast text to HTML for display
+        html_result = simple_markdown_to_html(roast_content)
         return jsonify({"success": True, "result": html_result})
 
     # No chat_response; decide best fallback.
@@ -565,8 +585,10 @@ This Flask route serves as the main orchestrator for the video roasting feature,
 
 **API Integration**: It calls the `call_reka_vision_qa()` function to communicate with the Reka Vision API, passing the video ID and receiving the AI-generated roast response along with any metadata or error information.
 
+**Response Parsing**: The API returns `chat_response` as a JSON string containing a nested structure with sections. The code parses this JSON to extract just the `section_content` fields, which contain the actual roast text, ignoring metadata like `section_id` and `section_type`. If parsing fails, it falls back to using the raw response string.
+
 **Response Processing Logic**: The route implements a smart fallback hierarchy for handling different response scenarios:
-- **Primary Response**: If `chat_response` is present, it converts the markdown to HTML and returns a success response
+- **Primary Response**: If `chat_response` is present, it parses sections and converts the markdown to HTML, returning a success response
 - **Fallback Messages**: If no chat response is available, it tries `system_message` then `error` from the API response
 - **Default Handling**: If none of the above are available, it provides a generic error message
 
