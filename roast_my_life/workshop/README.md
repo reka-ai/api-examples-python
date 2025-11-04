@@ -25,7 +25,7 @@ You'll paste the code step-by-step into placeholders inside the app to make it f
 
 ## 📋 Important Instructions
 
-In this workshop you will copy/paste the exact code provided in each step into the placeholders in:
+In this workshop, you will copy/paste the exact code provided in each step into the placeholders in:
 - `app.py`
 - `templates/form.html`
 
@@ -76,7 +76,7 @@ Open a terminal, and get a local copy of this repository with the following comm
 From the repository root, navigate to the workshop folder:
 
 ```bash
-cd roast_my_life/workshop
+cd api-examples-python/roast_my_life/workshop
 ```
 
 ## Step 3: Create Python Virtual Environment
