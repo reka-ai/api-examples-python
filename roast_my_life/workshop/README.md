@@ -111,6 +111,16 @@ API_KEY=YOUR_REKA_API_KEY
 BASE_URL=https://vision-agent.api.reka.ai
 ```
 
+### 🔑 Getting Your API Key
+
+You need a Reka API key with access to Vision features. Here's how to get a **FREE** key:
+
+1. Go to the [Reka Platform dashboard](https://link.reka.ai/free)
+2. Open the **API Keys** section on the left
+3. Create a new key and copy it to your environment
+4. Add it to `.env` as `API_KEY`
+
+
 ## Step 5: Run the Application
 
 Start the Flask development server:
@@ -125,16 +135,6 @@ Open <http://127.0.0.1:5000> in your browser to see the application.
 ![Roast my Life App first look](../../assets/roast-workshop-app-first-look.png)
 
 > **Note**: The app is not functional yet in its current state. We'll fix this in the following steps!
-
-## 🔑 Getting Your API Key
-
-You need a Reka API key with access to Vision features. Here's how to get a **FREE** key:
-
-1. Go to the [Reka Platform dashboard](https://link.reka.ai/free)
-2. Open the **API Keys** section on the left
-3. Create a new key and copy it to your environment
-4. Add it to `.env` as `API_KEY`
-
 
 # 💻 Making the App Dynamic
 
