@@ -63,7 +63,15 @@ The API uses secure authentication with API keys passed in the `X-Api-Key` heade
 
 We'll use Python 3.9+ with Flask for this workshop.
 
-## Step 1: Navigate to Workshop Directory
+## Step 1: Clone the repository
+
+Open a terminal, and get a local copy of this repository with the following command:
+
+   ```bash
+   git clone https://github.com/reka-ai/api-examples-python.git
+   ```
+
+## Step 2: Navigate to Workshop Directory
 
 From the repository root, navigate to the workshop folder:
 
@@ -71,7 +79,7 @@ From the repository root, navigate to the workshop folder:
 cd roast_my_life/workshop
 ```
 
-## Step 2: Create Python Virtual Environment
+## Step 3: Create Python Virtual Environment
 
 Create and activate a virtual environment, then install dependencies:
 
@@ -86,7 +94,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Step 3: Configure Environment Variables
+## Step 4: Configure Environment Variables
 
 This app reads settings from a `.env` file. A ready-to-edit sample is provided as `.env-sample`.
 
@@ -103,7 +111,7 @@ API_KEY=YOUR_REKA_API_KEY
 BASE_URL=https://vision-agent.api.reka.ai
 ```
 
-## Step 4: Run the Application
+## Step 5: Run the Application
 
 Start the Flask development server:
 
