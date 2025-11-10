@@ -37,6 +37,7 @@
                 </div>
                 {% for video in videos %}
                 <div class="image-card" data-id="{{ video.id }}" data-url="{{ video.url }}" onclick="selectVideo('{{ video.id }}')">
+                    <button class="delete-btn" type="button" aria-label="Delete video" title="Delete video" data-video-id="{{ video.id }}" data-video-name="{{ video.name|escape }}" onclick="confirmDelete(event, this.getAttribute('data-video-id'), this.getAttribute('data-video-name'))">&times;</button>
                     {% if video.thumbnail %}
                     <img src="{{ video.thumbnail }}" alt="{{ video.name }}" onerror="this.parentElement.querySelector('.thumbnail-placeholder').style.display='flex'; this.style.display='none';">
                     <div class="thumbnail-placeholder" style="display: none;">
@@ -266,6 +267,55 @@
             }
             window.open(selectedVideoUrl, '_blank');
         }
+
+        /**
+         * Ask the user to confirm deletion of a video, then call backend.
+         * @param {Event} evt
+         * @param {string} videoId
+         * @param {string} videoName
+         */
+        function confirmDelete(evt, videoId, videoName) {
+            evt.preventDefault();
+            evt.stopPropagation(); // prevent selecting the card
+            const nameDisplay = videoName || 'this video';
+            if (!videoId) return;
+            const ok = window.confirm(`Delete ${nameDisplay}? This cannot be undone.`);
+            if (ok) {
+                deleteVideo(videoId);
+            }
+        }
+
+        /**
+         * Call backend delete endpoint and update UI.
+         * @param {string} videoId
+         */
+        async function deleteVideo(videoId) {
+            try {
+                const resp = await fetch('/api/delete_video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ video_id: videoId })
+                });
+                const data = await resp.json();
+                if (resp.ok && data.success) {
+                    // Remove the card from DOM
+                    const card = document.querySelector(`.image-card[data-id="${videoId}"]`);
+                    if (card) card.remove();
+                    // Reset selection if needed
+                    if (selectedVideoId === videoId) {
+                        selectedVideoId = null;
+                        selectedVideoUrl = null;
+                        document.getElementById('processBtn').disabled = true;
+                        document.getElementById('watchBtn').disabled = true;
+                        document.getElementById('resultSection').classList.remove('show');
+                    }
+                } else {
+                    showError(data.error || 'Failed to delete video');
+                }
+            } catch (e) {
+                showError('Delete failed: ' + e.message);
+            }
+        }
     </script>
 
     <style>
@@ -406,6 +456,31 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Delete button */
+        .image-card { position: relative; }
+        .delete-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(0,0,0,0.55);
+            color: #fff;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.85;
+            transition: background 0.2s, transform 0.15s;
+            z-index: 10;
+        }
+        .delete-btn:hover { background: #d32f2f; transform: scale(1.05); }
+        .delete-btn:active { transform: scale(0.92); }
     </style>
 </body>
 </html>
