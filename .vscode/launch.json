@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Roast My Life (venv)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/roast_my_life/src/app.py",
+      "cwd": "${workspaceFolder}/roast_my_life",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/roast_my_life/.env"
+    }
+  ]
+}
