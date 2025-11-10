@@ -143,6 +143,32 @@ def simple_markdown_to_html(md: str) -> str:
     return markdown.markdown(md, extensions=['extra', 'sane_lists'])
 
 
+def _strip_code_fences(s: str) -> str:
+    """Remove leading/trailing markdown code fences from a potential JSON string.
+
+    Handles patterns like:
+    ```json\n{ ... }\n```  (standard fenced JSON)
+    json```{ ... }```      (reported reversed pattern)
+    ```\n{ ... }\n```      (no language)
+    Trailing ``` is also removed if present.
+    """
+    import re
+    if not isinstance(s, str):
+        return s
+    s = s.strip()
+    if s.lower().startswith("json```"):
+        s = s[7:].lstrip()  # len('json```') == 7
+    fence_match = re.match(r'^```[a-zA-Z]*\s*\n', s)
+    if fence_match:
+        s = s[fence_match.end():]
+    elif s.startswith("```") and '\n' in s:
+        first_newline = s.find('\n')
+        s = s[first_newline + 1:]
+    if s.endswith("```"):
+        s = s[:-3].rstrip()
+    return s
+
+
 @app.route('/')
 def home() -> str:
     """
@@ -343,7 +369,8 @@ def process_video() -> Dict[str, Any]:
         if isinstance(chat_response, str):
             try:
                 import json
-                parsed = json.loads(chat_response)
+                cleaned_chat = _strip_code_fences(chat_response)
+                parsed = json.loads(cleaned_chat)
                 if isinstance(parsed, dict) and 'sections' in parsed:
                     sections = parsed.get('sections', [])
                     content_parts = []
