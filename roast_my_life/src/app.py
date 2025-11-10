@@ -243,6 +243,68 @@ def upload_video() -> Dict[str, Any]:
         return jsonify({"success": False, "error": f"Upload failed: {str(e)}"}), 500
 
 
+@app.route('/api/delete_video', methods=['POST'])
+def delete_video() -> Dict[str, Any]:
+    """
+    Delete a video from the Reka Vision API.
+
+    Expects JSON body: { "video_id": "uuid" }
+
+    Returns:
+        Dict[str, Any]: JSON response with fields:
+            success (bool)
+            message (str) when successful
+            error (str) when not successful
+    """
+    data = request.get_json() or {}
+    video_id = (data.get('video_id') or '').strip()
+
+    if not video_id:
+        return jsonify({"success": False, "error": "Missing required field: video_id"}), 400
+
+    if not api_key:
+        return jsonify({"success": False, "error": "API key not configured"}), 500
+
+    if not base_url:
+        return jsonify({"success": False, "error": "BASE_URL not configured"}), 500
+
+    try:
+        resp = requests.delete(
+            f"{base_url.rstrip('/')}/videos/delete",
+            headers={
+                'X-Api-Key': api_key,
+                'Content-Type': 'application/json'
+            },
+            json={
+                'video_ids': [video_id]
+            },
+            timeout=30
+        )
+
+        # Try parse response json for richer errors
+        response_data: Dict[str, Any]
+        try:
+            response_data = resp.json()
+        except Exception:
+            response_data = {}
+
+        if resp.ok:
+            # Invalidate cache to force refresh on next load
+            _VIDEO_CACHE["timestamp"] = 0.0
+            return jsonify({
+                "success": True,
+                "message": response_data.get('message') or "Video deleted successfully"
+            })
+        else:
+            error_msg = response_data.get('error') or response_data.get('message') or f"HTTP {resp.status_code}"
+            return jsonify({"success": False, "error": f"Delete failed: {error_msg}"}), resp.status_code
+
+    except requests.Timeout:
+        return jsonify({"success": False, "error": "Request timed out"}), 504
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Delete failed: {str(e)}"}), 500
+
+
 @app.route('/api/process', methods=['POST'])
 def process_video() -> Dict[str, Any]:
     """
