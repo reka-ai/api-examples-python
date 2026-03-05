@@ -365,23 +365,35 @@ def process_video() -> Dict[str, Any]:
     if chat_response:
         roast_content = chat_response
 
-        # Parse the JSON string to extract section content
+        # If chat_response is JSON, extract the markdown text from it.
+        # The model is asked for markdown, but may sometimes return structured JSON.
         if isinstance(chat_response, str):
             try:
                 import json
                 cleaned_chat = _strip_code_fences(chat_response)
                 parsed = json.loads(cleaned_chat)
-                if isinstance(parsed, dict) and 'sections' in parsed:
-                    sections = parsed.get('sections', [])
+                if isinstance(parsed, dict):
                     content_parts = []
-                    for section in sections:
-                        if isinstance(section, dict) and 'section_content' in section:
-                            content_parts.append(section['section_content'])
-
+                    if 'sections' in parsed:
+                        for section in parsed.get('sections', []):
+                            if not isinstance(section, dict):
+                                continue
+                            section_type = section.get('section_type', '')
+                            if section_type == 'markdown' and 'markdown' in section:
+                                content_parts.append(section['markdown'])
+                            elif 'section_content' in section:
+                                content_parts.append(section['section_content'])
+                    if not content_parts:
+                        # No sections structure — look for common text fields
+                        for key in ('text', 'content', 'response', 'output', 'message', 'roast'):
+                            val = parsed.get(key)
+                            if isinstance(val, str) and val.strip():
+                                content_parts.append(val)
+                                break
                     if content_parts:
                         roast_content = '\n\n'.join(content_parts)
             except (json.JSONDecodeError, ValueError):
-                # If parsing fails, use the raw string as-is
+                # Not JSON — use the raw string as markdown (expected happy path)
                 pass
 
         # Convert Markdown roast text to HTML for display
